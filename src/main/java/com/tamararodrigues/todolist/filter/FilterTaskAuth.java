@@ -7,10 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.stereotype.Component;
@@ -19,11 +16,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.List;
 
 
 @Component
-public class FilterTaskAuth extends OncePerRequestFilter {
+public class FilterTaskAuth extends OncePerRequestFilter { // OncePerRequestFilter-class abstrata fornecida pelo Spring Framework que garante que o filtro seja executado exatamente uma vez por cada requisição HTTP.
 
     //Declaração e Injeção do Repositório
     @Autowired
@@ -52,10 +48,10 @@ public class FilterTaskAuth extends OncePerRequestFilter {
             }
 
 
+            //pega o retorno apenas que tenha o "basic" no inicio que o if manda
             try {
                 //substring remover o 'BASIC',pois n e necessario.Length o tamanho do Basic. trim remove os espacos que sobrou
                 var authEncoded = authorization.substring("Basic".length()).trim();
-
 
                 //decode do BASIC64
                 byte[] authDecode = Base64.getDecoder().decode(authEncoded);
@@ -97,9 +93,6 @@ public class FilterTaskAuth extends OncePerRequestFilter {
                     return;//interrompe se a senha for incorreta
                 }
 
-                // pega o ID do usuário na memoria da  requisição para resgatar no TaskController
-                //resumo:adciona o ID no request para mandar para outra class e assim saber qual o user exato do pedido , sem precisar buscar de novo na BD.
-                request.setAttribute("idUser", user.getId());
 
                 // Notificação de Sucesso ao Spring Security (Solução do 403)
                 //resumo:Aqui notifico p/ o spring security, que ja validei o user e pass, e que agr ele pode fazer a segunranca nativa/padrao. mando o usuario, credentials(pass) null, e uma Collections/lista em branco
@@ -110,7 +103,7 @@ public class FilterTaskAuth extends OncePerRequestFilter {
                 //com tudo ja verificado agr e preciso "armazenar" a informacao para o spring processar,
                 //SecurityContextHolder.createEmptyContext() cria um objeto em branco
                 // context.setAuthentication(authentication)-coloca a autenticacao dentro
-                //curityContextHolder.setContext(context) ativa e salva para mandar pro spring analisar e depois ir pro controllerTask
+                //securityContextHolder.setContext(context) ativa e salva para mandar pro spring analisar e depois ir pro controllerTask
                 var context = SecurityContextHolder.createEmptyContext();
                 context.setAuthentication(authentication);
                 SecurityContextHolder.setContext(context);//guarda na memoria temporaria do servidor Java
@@ -122,6 +115,7 @@ public class FilterTaskAuth extends OncePerRequestFilter {
                 //filtro de corrente, diz: fiz a minha parte, agr passe pro pocesso seguinte -> Security e depois TaskController
                 filterChain.doFilter(request, response);
 
+                //Se o texto que vem depois do "Basic " estiver estragado ou corrompido, ou try falha o catch assume o controlo para a aplicação não ir abaixo.
             } catch (IllegalArgumentException e) {
 
                 // Se o Base64 enviado estiver inválido,
@@ -131,6 +125,7 @@ public class FilterTaskAuth extends OncePerRequestFilter {
             }
         } else {
 
+            //filtro que passa pra frente as requisicoes que nao seja a (task)
             filterChain.doFilter(request, response);
         }
     }
