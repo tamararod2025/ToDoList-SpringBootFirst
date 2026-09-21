@@ -23,34 +23,13 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    //criacao de tabela/objeto/user
-
-    /*@PostMapping("/")
-    public UserModel create(@RequestBody UserModel userModel){
-        var user = this.userRepository.findByUsername(userModel.getUsername());
-
-        if(user != null){
-            System.out.println("Usuario ja existe!");
-            return null;
-        }
-        var userCreated = this.userRepository.save(userModel);
-       return userCreated;*/
-
-
-    //ResponseEntity-retorno de status
-
-
     @PostMapping("/")
     public ResponseEntity<?> create(@RequestBody UserModel userModel) {
         var user = this.userRepository.findByUsername(userModel.getUsername());
 
         if (user != null) {
-            //msg erro
-            //status code
-
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario ja existe");
         }
-
 
         // Criptografa a senha diretamente enviando a String
         String passwordHash = passwordEncoder.encode(userModel.getPassword());

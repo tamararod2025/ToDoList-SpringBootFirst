@@ -23,7 +23,7 @@ public class TaskController {
     //ResponseEntity <Object> ->tipo de retorno (pode ser uma TaskModel se tiver certo, ou String em caso de erro)
     //@RequestBody TaskModel taskModel ->o spring pega o JSOn no corpo da request, e ja converte em uma class taskModel
     //HttpServletRequest request -> Dá acesso direto ao objeto da requisição HTTP que atravessou os filtros de segurança, permitindo resgatar o idUser previamente salvo no FilterTaskAuth.
-    public ResponseEntity <Object> create(@RequestBody TaskModel taskModel,  @AuthenticationPrincipal UserModel userModel){
+    public ResponseEntity <Object> create( @RequestBody TaskModel taskModel,  @AuthenticationPrincipal UserModel userModel){
 
         //Esta linha garante que a tarefa fique vinculada unicamente ao utilizador que fez o login
             taskModel.setIdUser(userModel.getId());
@@ -42,7 +42,7 @@ public class TaskController {
             //salva a tarefa da BD
         var task = this.taskRepository.save(taskModel);
         //Monta a resposta final que o servidor entrega ao usuario, no caso 201(created)
-        return ResponseEntity.status(HttpStatus.CREATED).body(task);
+        return ResponseEntity.status(HttpStatus.OK).body(task);
 
 
     }
@@ -73,7 +73,7 @@ public class TaskController {
         }
         //se a tarefa nao pertencer ao usuario, nao faz alteracoes
         if(!taskOld.getIdUser().equals(userModel.getId())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário não tem permissão para alterar esta tarefa");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário não tem permissão para alterar esta tarefa");//400
         }
 
         //pega o antigo title e substitui pelo novo
@@ -85,8 +85,8 @@ public class TaskController {
         //salva a taskOld ja auterada na BD e coloca em uma variavel
         var taskUpdated = this.taskRepository.save(taskOld);
 
-        //retorno
-        return ResponseEntity.ok(taskUpdated);
+        //retorno 200
+        return ResponseEntity.ok().body(taskUpdated);
     }
 
 

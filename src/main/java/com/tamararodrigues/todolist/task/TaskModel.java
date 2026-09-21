@@ -32,4 +32,12 @@ public class TaskModel {
     private LocalDateTime createdAt;
 
 
+// o lombok tem o proprio setTitle, porem sobrescrevi a mao. Smp que o java rodar e entrar no title, ao fazer a validacao e for mais de 50 caracteres, entra no trow new Exception e o usuario consegue ler a Exception
+    public void setTitle (String title) throws Exception{
+        if(title.length() > 50){
+            throw new Exception("O campo title deve conter no maximo 50 caracteres");
+        }
+        this.title = title;
+    }
+
 }
